@@ -22,6 +22,35 @@ const Dashboard = () => {
       console.log(err);
     }
   }
+  async function handleToggleQueue(queue) {
+    try {
+      if (queue.isActive) {
+        await api.patch(`/queue/${queue._id}/close`);
+      } else {
+        await api.patch(`/queue/${queue._id}/open`);
+      }
+
+      await fetchQueues();
+    } catch (err) {
+      console.log(err.response?.data);
+    }
+  }
+
+  async function handleDeleteQueue(queueId) {
+    try {
+      const confirmDelete = window.confirm(
+        "Are you sure you want to delete this queue?"
+      );
+
+      if (!confirmDelete) return;
+
+      await api.delete(`/queue/${queueId}`);
+
+      await fetchQueues();
+    } catch (err) {
+      console.log(err.response?.data);
+    }
+  }
 
   const [formData, setFormData] = useState({
     name: "",
@@ -159,7 +188,10 @@ const Dashboard = () => {
                     queue={queue}
                     onManage={() => navigate(`/queue/${queue._id}`)}
                     onShowQR={() => setSelectedQueue(queue)}
+                    onToggleQueue={() => handleToggleQueue(queue)}
+                    onDelete={() => handleDeleteQueue(queue._id)}
                   />
+                  
                 ))}
               </div>
             )}

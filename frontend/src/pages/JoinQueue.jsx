@@ -1,6 +1,7 @@
 import api from '../api/axios'
 import { useParams } from 'react-router-dom'
-import { useState,useEffect } from 'react'
+import { useState, useEffect } from 'react'
+import socket from '../socket/Socket'
 
 
 const JoinQueue = () => {
@@ -25,6 +26,7 @@ const JoinQueue = () => {
       setTokenNumber(token);
 
       await fetchPosition(token);
+      socket.emit("join-queue", queueId);
     }
     catch (err) {
       console.log(err.response?.data);
@@ -43,17 +45,87 @@ const JoinQueue = () => {
       console.log(err.response?.data);
     }
   }
+
   useEffect(() => {
     if (!tokenNumber) return;
 
-    const interval = setInterval(() => {
+    socket.on("customer-called", () => {
       fetchPosition(tokenNumber);
-    }, 5000);
+    });
 
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    socket.on("customer-completed", () => {
+      fetchPosition(tokenNumber);
+    });
+
+    socket.on("customer-skipped", () => {
+      fetchPosition(tokenNumber);
+    });
+
+    return () => {
+      socket.off("customer-called");
+      socket.off("customer-completed");
+      socket.off("customer-skipped");
+    };
   }, [tokenNumber]);
-  
+
+  function renderCustomerStatus() {
+    if (!customerStatus) {
+      return (
+        <div className="rounded-2xl bg-slate-50 p-5 text-sm text-slate-500">
+          Loading your queue position...
+        </div>
+      );
+    }
+
+    if (customerStatus.status === "Called") {
+      return (
+        <div className="rounded-3xl border border-blue-100 bg-blue-50 px-6 py-8 text-center ring-1 ring-blue-100">
+          <p className="text-3xl font-semibold tracking-tight text-blue-800">It's Your Turn!</p>
+          <p className="mt-3 text-sm font-medium text-blue-700">Please proceed to the service counter.</p>
+        </div>
+      );
+    }
+
+    if (customerStatus.status === "Completed") {
+      return (
+        <div className="rounded-3xl border border-emerald-100 bg-emerald-50 px-6 py-8 text-center ring-1 ring-emerald-100">
+          <p className="text-3xl font-semibold tracking-tight text-emerald-800">✅ Service Completed</p>
+          <p className="mt-3 text-sm font-medium text-emerald-700">Thank you for visiting.</p>
+        </div>
+      );
+    }
+
+    if (customerStatus.status === "Skipped") {
+      return (
+        <div className="rounded-3xl border border-red-100 bg-red-50 px-6 py-8 text-center ring-1 ring-red-100">
+          <p className="text-3xl font-semibold tracking-tight text-red-800">⚠ You Were Skipped</p>
+          <p className="mt-3 text-sm font-medium text-red-700">Please contact the administrator.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-2xl bg-slate-50 p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Status</p>
+          <span className="mt-2 inline-flex rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700 ring-1 ring-blue-100">
+            {customerStatus.status}
+          </span>
+        </div>
+
+        <div className="rounded-2xl bg-slate-50 p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Position</p>
+          <p className="mt-2 text-2xl font-semibold text-slate-950">{customerStatus.position}</p>
+        </div>
+
+        <div className="rounded-2xl bg-slate-50 p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Est. Wait</p>
+          <p className="mt-2 text-2xl font-semibold text-slate-950">{customerStatus.estimatedWaitTime} mins</p>
+        </div>
+      </div>
+    );
+  }
+
   if (tokenNumber) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
@@ -69,30 +141,7 @@ const JoinQueue = () => {
             <h2 className="mt-2 text-6xl font-semibold tracking-tight">{tokenNumber}</h2>
           </div>
 
-          {customerStatus ? (
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Status</p>
-                <span className="mt-2 inline-flex rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700 ring-1 ring-blue-100">
-                  {customerStatus.status}
-                </span>
-              </div>
-
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Position</p>
-                <p className="mt-2 text-2xl font-semibold text-slate-950">{customerStatus.position}</p>
-              </div>
-
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Est. Wait</p>
-                <p className="mt-2 text-2xl font-semibold text-slate-950">{customerStatus.estimatedWaitTime} mins</p>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-2xl bg-slate-50 p-5 text-sm text-slate-500">
-              Loading your queue position...
-            </div>
-          )}
+          {renderCustomerStatus()}
         </section>
       </div>
     );
