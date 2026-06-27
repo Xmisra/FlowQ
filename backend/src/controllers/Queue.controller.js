@@ -1,4 +1,5 @@
 import Queue from "../models/Queue.model.js";
+import QueueEntry from "../models/QueueEntry.model.js";
 
 async function handleCreateQueue(req, res) {
 
@@ -130,7 +131,10 @@ async function handleDeleteQueue(req, res) {
                 error: "forbidden!!!"
             });
         }
-
+        
+        await QueueEntry.deleteMany({
+            queueId
+        });
         await queue.deleteOne();
 
         return res.status(200).json({

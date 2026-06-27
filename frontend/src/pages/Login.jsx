@@ -2,6 +2,7 @@ import { useState } from 'react';
 import api from '../api/axios';
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { AuthContext } from "../context/AuthContext";
 
 const Login = () => {
@@ -26,11 +27,11 @@ const Login = () => {
         e.preventDefault();
 
         try{
-            const response = await api.post(
+            await api.post(
                 "/admin/login",
                 formData
             );
-            console.log(response.data);
+            toast.success("Logged in");
 
             await checkAuth();
 
@@ -39,7 +40,7 @@ const Login = () => {
         }
         catch(err)
         {
-            console.log(err);
+            toast.error(err.response?.data?.error || "Login failed");
         }
         
     }
@@ -49,9 +50,9 @@ const Login = () => {
             <section className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-soft">
                 <div className="mb-8 text-center">
                     <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-sm font-bold text-white shadow-sm">
-                        QL
+                        FQ
                     </div>
-                    <h1 className="text-2xl font-semibold tracking-tight text-slate-950">Welcome to QueueLess</h1>
+                    <h1 className="text-2xl font-semibold tracking-tight text-slate-950">Welcome to FlowQ</h1>
                     <p className="mt-2 text-sm text-slate-500">Sign in to manage your queues.</p>
                 </div>
 
@@ -67,7 +68,7 @@ const Login = () => {
                             value={formData.email}
                             onChange={handleChange}
                             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                            placeholder="admin@queueless.app"
+                            placeholder="admin@flowq.app"
                         />
                     </div>
 

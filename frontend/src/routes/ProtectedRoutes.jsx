@@ -24,6 +24,14 @@ const ProtectedRoutes = () => {
                         </ProtectedRoute>
                     }
                 />
+                <Route
+                    path="/queue/:queueId"
+                    element={
+                        <ProtectedRoute>
+                            <QueueManagement />
+                        </ProtectedRoute>
+                    }
+                />
             </Routes>
         </BrowserRouter>
     );

@@ -2,6 +2,12 @@ import Admin from "../models/Admin.model.js";
 import bcrypt from "bcrypt";
 import setUser from "../services/auth.services.js";
 
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+};
+
 async function handleAdminSignup(req, res) {
     try {
         const { name, email, password } = req.body;
@@ -66,9 +72,7 @@ async function handleAdminLogin(req, res) {
 
         //set cookie
         res.cookie("uid", token, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            ...cookieOptions,
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
@@ -85,10 +89,16 @@ async function handleAdminLogin(req, res) {
     }
 
 }
-async function handleGetMe(req,res)
-{
+
+async function handleLogout(req, res) {
+    res.clearCookie("uid", cookieOptions);
+    return res.status(200).json({
+        message: "You have been logged out successfully!"
+    });
+}
+async function handleGetMe(req, res) {
     return res.status(200).json({
         admin: req.user
     });
 }
-export { handleAdminSignup, handleAdminLogin,handleGetMe };
+export { handleAdminSignup, handleAdminLogin, handleGetMe, handleLogout };

@@ -1,6 +1,7 @@
 import api from '../api/axios'
 import { useParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
 import socket from '../socket/Socket'
 
 
@@ -29,7 +30,7 @@ const JoinQueue = () => {
       socket.emit("join-queue", queueId);
     }
     catch (err) {
-      console.log(err.response?.data);
+      toast.error(err.response?.data?.error || "Could not join queue");
 
     }
   }
@@ -42,7 +43,7 @@ const JoinQueue = () => {
       setCustomerStatus(response.data);
     }
     catch (err) {
-      console.log(err.response?.data);
+      toast.error(err.response?.data?.error || "Could not load queue status");
     }
   }
 
@@ -151,7 +152,7 @@ const JoinQueue = () => {
       <section className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-soft">
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-sm font-bold text-white shadow-sm">
-            QL
+            FQ
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-slate-950">Join Queue</h1>
           <p className="mt-2 text-sm text-slate-500">Enter your details to receive a live token.</p>

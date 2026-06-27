@@ -437,62 +437,53 @@ async function handleGetCustomerPosition(req, res) {
 async function handleAnalytics(req, res) {
     try {
         const { queueId } = req.params;
+
         const queue = await Queue.findById(queueId);
 
         if (!queue) {
             return res.status(404).json({
-                error: "queue not found!!!"
+                error: "Queue not found."
             });
         }
+
         if (!queue.isActive) {
             return res.status(400).json({
-                error: "This Queue is Inactive!!!"
+                error: "This queue is inactive."
             });
         }
+
         if (queue.admin.toString() !== req.user.id) {
             return res.status(403).json({
-                error: "Forbidden!!!"
+                error: "Forbidden."
             });
         }
 
-        const countCustomers = await QueueEntry.countDocuments({
-            queueId
-        });
-
-        const total = countCustomers;
-
-        const countWaiting = await QueueEntry.countDocuments({
-            queueId,
-            status: "Waiting"
-        });
-
-        const totalWaiting = countWaiting;
-
-        const countCompleted = await QueueEntry.countDocuments({
-            queueId,
-            status: "Completed"
-        });
-
-        const totalCompleted = countCompleted;
-
-        const countSkipped = await QueueEntry.countDocuments({
-            queueId,
-            status: "Skipped"
-        });
-
-        const totalSkipped = countSkipped;
+        const [
+            total,
+            totalWaiting,
+            totalCalled,
+            totalCompleted,
+            totalSkipped
+        ] = await Promise.all([
+            QueueEntry.countDocuments({ queueId }),
+            QueueEntry.countDocuments({ queueId, status: "Waiting" }),
+            QueueEntry.countDocuments({ queueId, status: "Called" }),
+            QueueEntry.countDocuments({ queueId, status: "Completed" }),
+            QueueEntry.countDocuments({ queueId, status: "Skipped" })
+        ]);
 
         return res.status(200).json({
             total,
             totalWaiting,
+            totalCalled,
             totalCompleted,
             totalSkipped
         });
-    }
-    catch (err) {
+
+    } catch (err) {
         return res.status(500).json({
             error: err.message
-        })
+        });
     }
 }
 export { handleNewQueueEntry, handleCallNext, handleCompleted, handleSkipped, handleShowStats, handleGetCustomerPosition, handleAnalytics };
