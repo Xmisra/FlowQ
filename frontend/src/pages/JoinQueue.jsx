@@ -13,6 +13,7 @@ const JoinQueue = () => {
   const [tokenNumber, setTokenNumber] = useState(null);
   const { queueId } = useParams();
   const [customerStatus, setCustomerStatus] = useState(null);
+  const [isJoining, setIsJoining] = useState(false);
   function handleChange(e) {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -20,6 +21,9 @@ const JoinQueue = () => {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (isJoining) return;
+
+    setIsJoining(true);
     try {
       const response = await api.post(`/queueJoin/${queueId}/join`, formData);
       const token = response.data.tokenNumber;
@@ -32,6 +36,8 @@ const JoinQueue = () => {
     catch (err) {
       toast.error(err.response?.data?.error || "Could not join queue");
 
+    } finally {
+      setIsJoining(false);
     }
   }
   async function fetchPosition(token) {
@@ -169,7 +175,8 @@ const JoinQueue = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              disabled={isJoining}
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
               placeholder="Your full name"
             />
           </div>
@@ -184,16 +191,18 @@ const JoinQueue = () => {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              disabled={isJoining}
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
               placeholder="Your phone number"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100"
+            disabled={isJoining}
+            className="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none"
           >
-            Join Queue
+            {isJoining ? "Joining..." : "Join Queue"}
           </button>
         </form>
       </section>

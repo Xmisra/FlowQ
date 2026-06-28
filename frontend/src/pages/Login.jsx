@@ -13,6 +13,7 @@ const Login = () => {
 
     const { checkAuth } = useContext(AuthContext);
     const navigate = useNavigate();
+    const [isSigningIn, setIsSigningIn] = useState(false);
 
     function handleChange(e) {
         const { name, value } = e.target;
@@ -25,7 +26,9 @@ const Login = () => {
 
     async function handleSubmit(e) {
         e.preventDefault();
+        if (isSigningIn) return;
 
+        setIsSigningIn(true);
         try{
             await api.post(
                 "/admin/login",
@@ -41,6 +44,9 @@ const Login = () => {
         catch(err)
         {
             toast.error(err.response?.data?.error || "Login failed");
+        }
+        finally {
+            setIsSigningIn(false);
         }
         
     }
@@ -67,7 +73,8 @@ const Login = () => {
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
-                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                            disabled={isSigningIn}
+                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
                             placeholder="admin@flowq.app"
                         />
                     </div>
@@ -82,16 +89,19 @@ const Login = () => {
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
-                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                            disabled={isSigningIn}
+                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
                             placeholder="Enter your password"
                         />
                     </div>
 
-                    <input
+                    <button
                         type="submit"
-                        value="Login"
-                        className="w-full cursor-pointer rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100"
-                    />
+                        disabled={isSigningIn}
+                        className="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none"
+                    >
+                        {isSigningIn ? "Signing In..." : "Login"}
+                    </button>
                 </form>
             </section>
         </main>
