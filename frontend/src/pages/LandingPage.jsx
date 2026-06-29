@@ -80,7 +80,7 @@ const LandingPage = () => {
                 to="/login?demo=true"
                 className="inline-flex items-center justify-center rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 shadow-sm shadow-emerald-500/20 transition hover:bg-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-300/30"
               >
-                🚀 Try Demo
+                Try Demo
               </Link>
               <Link
                 to="/login"
@@ -94,12 +94,6 @@ const LandingPage = () => {
               >
                 Sign Up
               </Link>
-              <a
-                href="#how-it-works"
-                className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15 focus:outline-none focus:ring-4 focus:ring-white/20"
-              >
-                How It Works
-              </a>
             </div>
           </div>
 
